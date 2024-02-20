@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\floors;
+use App\Models\garages;
 use Illuminate\Http\Request;
+use App\Http\Controllers\FloorsController;
 
 class FloorsController extends Controller
 {
@@ -20,18 +22,7 @@ class FloorsController extends Controller
         // return floors::join('garages',"garages.id","=","floors.garageId")->get();
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store($floor)
-    {
 
-           return floors::create($floor);
-    
-    }
 
     /**
      * Display the specified resource.
@@ -83,5 +74,5 @@ class FloorsController extends Controller
         ->where('garageId', '=', $garageId)
         ->get();
         // return floors::join('garages',"garages.id","=","floors.garageId")->where('garageId', '=', $garageId)->get();
-    }
+
 }

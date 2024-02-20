@@ -20,20 +20,7 @@ class PlacesController extends Controller
             ->get();
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'num'=> "required",
-           'floorId'=>'required|exists:floors,id'
-        ]);
-        return places::create($request->all());
-    }
+
 
     /**
      * Display the specified resource.

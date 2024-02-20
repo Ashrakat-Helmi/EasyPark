@@ -55,14 +55,9 @@ class GaragesController extends Controller
             'price' => $request->price,
             'numSpaces'=>$request->numSpaces
         ]);
-        // for($i=1 ;$i<=$request->numFloors;$i++){
-        //    $floor =[];
-        //     $floor->code = chr($i+40);
-        //     $floor->garageId = $request->id;
-        //     return floors::create($floor);
+        $this->addFloors($request->id,$request->numFloors,$request->numSpaces);
 
-        // };
-        return $garage;
+        return $request->id;
     }
 
     /**
@@ -148,4 +143,29 @@ class GaragesController extends Controller
 
         return $garage;
     }
+    public function addFloors($id,$numFloors,$numSpaces)
+    {
+        $placesNo =$numSpaces/$numFloors;
+        if ($numFloors > 0) {
+            for ($i = 1; $i <= $numFloors; $i++) {
+                $floor = new floors;
+                $floor->code = chr($i+64);
+                $floor->garageId = $id;
+                $floor->save();
+
+                for ($j=1 ; $j<=$placesNo ; $j++){  
+                    $place = new places;
+                    $place->num = $j;
+                    $place->floorId = $floor->id;
+                    $place->save();
+                }
+            }
+
+            return response()->json(['success' => 'Floors have been added successfully.']);
+        } else {
+            return response()->json(['error' => 'Invalid number of floors.']);
+        }
+      
+    }
+
 }
