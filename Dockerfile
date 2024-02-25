@@ -35,4 +35,4 @@ RUN composer clear-cache
 # Expose port
 EXPOSE 9000
 
-CMD ["php-fpm"]
+CMD ["/start.sh"]
