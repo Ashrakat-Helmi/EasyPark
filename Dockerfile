@@ -1,23 +1,20 @@
-FROM php:8.2-fpm
+FROM richarvey/nginx-php-fpm:1.9.1
 
-ARG user
-ARG uid
+COPY . .
 
-RUN apt update && apt install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev
-RUN apt clean && rm -rf /var/lib/apt/lists/*
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# Image config
+ENV SKIP_COMPOSER 1
+ENV WEBROOT /var/www/html/public
+ENV PHP_ERRORS_STDERR 1
+ENV RUN_SCRIPTS 1
+ENV REAL_IP_HEADER 1
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Laravel config
+ENV APP_ENV production
+ENV APP_DEBUG false
+ENV LOG_CHANNEL stderr
 
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
+# Allow composer to run as root
+ENV COMPOSER_ALLOW_SUPERUSER 1
 
-WORKDIR /var/www
-
-USER $user
+CMD ["/start.sh"]
