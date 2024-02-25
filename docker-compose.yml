@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/var/www
+    networks:
+      - [network-name]
+  mysql:
+    image: mysql:8.0
+    volumes:
+      - mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: [database-name]
+      MYSQL_USER: [database-user]
+      MYSQL_PASSWORD: [database-password]
+      MYSQL_ROOT_PASSWORD: [database-root-password]
+    networks:
+      - [network-name]
+  nginx:
+    image: nginx:alpine
+    container_name: [nginx-container-name]
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - .:/var/www
+      - ./docker-compose/nginx:/etc/nginx/conf.d/
+    networks:
+      - [network-name]
+networks:
+  [network-name]:
+    driver: bridge

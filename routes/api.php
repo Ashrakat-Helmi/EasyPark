@@ -32,13 +32,13 @@ Route::group(['middleware'=>["auth:sanctum"]],function(){
     
 });
 Route::resource('garages',GaragesController::class);
-    Route::resource('floors',FloorsController::class);
-    Route::resource('places',PlacesController::class);
-    
-    Route::get('/floors/showByGarage/{garageId}', [FloorsController::class, 'showByGarage']);
-    Route::get('/places/showByGarage/{garageId}', [PlacesController::class, 'showByGarage']);
-    Route::get('/places/showByFloor/{floorId}', [PlacesController::class, 'showByFloor']);
-    Route::get('/garages/getImage/{garageId}', [GaragesController::class, 'getImage']);
-    Route::get('/garages/updateImage/{garageId}', [GaragesController::class, 'updateImage']);
+Route::resource('floors',FloorsController::class);
+Route::resource('places',PlacesController::class);
 
-    Route::post('/logout',[authController::class,'logout']);
+Route::get('/floors/showByGarage/{garageId}', [FloorsController::class, 'showByGarage']);
+Route::get('/places/showByGarage/{garageId}', [PlacesController::class, 'showByGarage']);
+Route::get('/places/showByFloor/{floorId}', [PlacesController::class, 'showByFloor']);
+Route::get('/garages/getImage/{garageId}', [GaragesController::class, 'getImage']);
+Route::get('/garages/updateImage/{garageId}', [GaragesController::class, 'updateImage']);
+
+Route::post('/logout',[authController::class,'logout']);
