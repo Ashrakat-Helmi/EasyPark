@@ -78,4 +78,3 @@ COPY ./public /var/www/html
 # Switch to a non-privileged user (defined in the base image) that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
 USER www-data
-docker compose up
