@@ -1,38 +1,20 @@
-FROM php:8.1.0-fpm
+FROM richarvey/nginx-php-fpm:1.9.1
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-        libfreetype6-dev \
-        libjpeg62-turbo-dev \
-        libpng-dev \
-        libzip-dev \
-        zip \
-        unzip \
-        git \
-        curl \
-        && docker-php-ext-install -j$(nproc) pdo_mysql zip pcntl bcmath gd \
-        && docker-php-ext-configure gd --with-freetype --with-jpeg \
-        && docker-php-ext-install -j$(nproc) gd
+COPY . .
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Image config
+ENV SKIP_COMPOSER 1
+ENV WEBROOT /var/www/html/public
+ENV PHP_ERRORS_STDERR 1
+ENV RUN_SCRIPTS 1
+ENV REAL_IP_HEADER 1
 
-# Copy application code
-COPY . /app
+# Laravel config
+ENV APP_ENV production
+ENV APP_DEBUG false
+ENV LOG_CHANNEL stderr
 
-# Set working directory
-WORKDIR /app
-
-# Install dependencies
-RUN composer install --no-autoloader --no-scripts
-
-# Install dependencies with autoloader and scripts
-RUN composer install --no-dev --prefer-dist --optimize-autoloader
-
-# Clean up
-RUN composer clear-cache
-
-# Expose port
-EXPOSE 9000
+# Allow composer to run as root
+ENV COMPOSER_ALLOW_SUPERUSER 1
 
 CMD ["/start.sh"]
