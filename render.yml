@@ -13,3 +13,5 @@ services:
       - RENDER_DATABASE_URL
     commands:
       - php artisan migrate --force
+
+      

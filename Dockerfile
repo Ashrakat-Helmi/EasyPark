@@ -1,20 +1,33 @@
-FROM richarvey/nginx-php-fpm:1.9.1
+FROM php:8.2-apache
 
-COPY . .
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    libzip-dev \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Image config
-ENV SKIP_COMPOSER 1
-ENV WEBROOT /var/www/html/public
-ENV PHP_ERRORS_STDERR 1
-ENV RUN_SCRIPTS 1
-ENV REAL_IP_HEADER 1
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql zip
 
-# Laravel config
-ENV APP_ENV production
-ENV APP_DEBUG false
-ENV LOG_CHANNEL stderr
+# Enable Apache rewrite module
+RUN a2enmod rewrite
 
-# Allow composer to run as root
-ENV COMPOSER_ALLOW_SUPERUSER 1
+# Copy application files
+COPY . /var/www/html
+# Set directory permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install application dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Generate Laravel key
+RUN php artisan key:generate
+
+# Expose port
+EXPOSE 80
+
+# Set the entry point
+CMD ["apache2-foreground"]
