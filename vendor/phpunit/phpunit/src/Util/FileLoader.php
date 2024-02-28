@@ -25,7 +25,7 @@ final class FileLoader
     /**
      * Checks if a PHP sourcecode file is readable. The sourcecode file is loaded through the load() method.
      *
-     * As a fallback, PHP looks in the directory of the file executing the stream_resolve_include_path function.
+     * As a fallback, PHP looks in the directory of the file executing the stream_resolve_ function.
      * We do not want to load the Test.php file here, so skip it if it found that.
      * PHP prioritizes the include_path setting, so if the current directory is in there, it will first look in the
      * current working directory.
