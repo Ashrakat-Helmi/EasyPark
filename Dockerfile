@@ -1,33 +1,19 @@
-FROM php:8.2-apache
+FROM php:8.2-fpm-alpine
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libzip-dev \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache nginx wget
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql zip
+RUN mkdir -p /run/nginx
 
-# Enable Apache rewrite module
-RUN a2enmod rewrite
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 
-# Copy application files
-COPY . /var/www/html
-# Set directory permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN mkdir -p /app
+COPY . /app
+COPY ./src /app
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN sh -c "wget http://getcomposer.org/composer.phar && chmod a+x composer.phar && mv composer.phar /usr/local/bin/composer"
+RUN cd /app && \
+    /usr/local/bin/composer install --no-dev
 
-# Install application dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN chown -R www-data: /app
 
-# Generate Laravel key
-RUN php artisan key:generate
-
-# Expose port
-EXPOSE 80
-
-# Set the entry point
-CMD ["apache2-foreground"]
+CMD sh /app/docker/startup.sh
