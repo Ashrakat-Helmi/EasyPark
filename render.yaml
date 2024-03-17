@@ -1,0 +1,44 @@
+services:
+  - type: web
+    plan: custom
+    name: my-laravel-app
+    runtime: docker
+    buildCommand: "composer install"
+    startCommand: "php artisan serve --host=0.0.0.0 --port=8000"
+    environmentVariables:
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_URL: ${FORWARDED_REQUEST_URL}
+      DB_CONNECTION: pgsql
+      DB_HOST: ${DATABASE_HOST}
+      DB_PORT: 5432
+      DB_DATABASE: ${DATABASE_NAME}
+      DB_USERNAME: ${DATABASE_USER}
+      DB_PASSWORD: ${DATABASE_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PORT: 6379
+      QUEUE_CONNECTION: redis
+      MEMCACHED_HOST: ${MEMCACHED_HOST}
+      MEMCACHED_PORT: 11211
+    ports:
+      - 8000
+    dockerfilePath: Dockerfile
+    dockerContext: .
+
+databases:
+  - name: ${DATABASE_NAME}
+    user: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    host: ${DATABASE_HOST}
+    port: 5432
+    type: postgres
+
+redis:
+  - name: ${REDIS_HOST}
+    password: ${REDIS_PASSWORD}
+    port: 6379
+
+memcached:
+  - name: ${MEMCACHED_HOST}
+    port: 11211
