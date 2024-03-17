@@ -1,10 +1,9 @@
 services:
   - type: web
     plan: custom
-    name: my-laravel-app
     runtime: docker
     buildCommand: "composer install"
-    startCommand: "apache2-foreground"
+    startCommand: "nginx -g 'daemon off;'"
     environmentVariables:
       APP_ENV: production
       APP_DEBUG: false
@@ -40,5 +39,5 @@ redis:
     port: 6379
 
 memcached:
-  - name: ${MEMCACHED_HOST}
+  -name: ${MEMCACHED_HOST}
     port: 11211

@@ -1,49 +1,28 @@
-FROM php:8.2-fpm
+FROM php:8.2-fpm-alpine
 
-# Install dependencies
-RUN apk add --no-cache apache2 \
-        libfreetype6-dev \
-        libjpeg62-turbo-dev \
-        libpng-dev \
-        libzip-dev \
-        zip \
-        unzip
+# sets up the server Nginx
+RUN apk add --no-cache nginx
 
-# Install PHP extensions
-RUN docker-php-ext-install -j$(nproc) pdo_mysql zip pcntl bcmath && docker-php-ext-configure gd --with-freetype --with-jpeg && docker-php-ext-install -j$(nproc) gd
+# Copy Nginx configuration file
+COPY nginx.conf ./nginx.conf
 
-# Set timezone
-RUN ln -snf /usr/share/zoneinfo/UTC /etc/localtime && echo "UTC" > /etc/timezone
+# Copy Laravel application files
+COPY . /var/www/html
+
+# Set the working directory
+WORKDIR /var/www/html
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Set working directory
-WORKDIR /app
+# Install Laravel dependencies
+RUN composer install
 
-# Copy composer.lock and composer.json
-COPY composer.lock composer.json /app/
+# Set Nginx user and group
+RUN addgroup -S nginx && adduser -S -G nginx www
 
-# Install dependencies
-RUN composer install --no-autoloader --no-scripts
+# Set the permissions for the Laravel application files
+RUN chown -R www:nginx /var/www/html
 
-# Copy everything else
-COPY . /app/
-
-# Create a link to the public directory
-RUN ln -s /app/public /app/html
-
-# Run composer dump-autoload
-RUN composer dump-autoload --optimize --no-scripts
-
-# Install Apache
-RUN apk add --no-cache apache2
-
-# Copy Apache configuration
-COPY apache.conf ./apache2.conf
-
-# Enable Apache modules
-RUN a2enmod rewrite headers
-
-# Start Apache server
-CMD ["httpd", "-D", "FOREGROUND"]
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
