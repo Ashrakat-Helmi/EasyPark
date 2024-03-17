@@ -1,7 +1,7 @@
-FROM php:8.2-apache
+FROM php:8.2-fpm
 
 # Install dependencies
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache apache2 \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
@@ -36,23 +36,11 @@ RUN ln -s /app/public /app/html
 # Run composer dump-autoload
 RUN composer dump-autoload --optimize --no-scripts
 
-# Expose port 80
-EXPOSE 80
-
-# Set environment variables
-ENV APP_ENV production
-ENV APP_DEBUG 0
-ENV LOG_CHANNEL daily
-ENV BROADCAST_DRIVER log
-ENV CACHE_DRIVER redis
-ENV SESSION_DRIVER database
-ENV QUEUE_DRIVER database
-
-# Removedefault Apache configuration
-RUN rm /etc/apache2/sites-available/000-default.conf
+# Install Apache
+RUN apk add --no-cache apache2
 
 # Copy Apache configuration
-COPY apache.conf /etc/apache2/sites-available/000-default.conf
+COPY apache.conf ./apache2.conf
 
 # Enable Apache modules
 RUN a2enmod rewrite headers
