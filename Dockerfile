@@ -1,18 +1,53 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.2-fpm
 
-RUN apk add --no-cache nginx wget
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libpng-dev \
+        libzip-dev \
+        zip \
+        unzip
 
-RUN mkdir -p /run/nginx
+# Install PHP extensions
+RUN docker-php-ext-install -j$(nproc) pdo_mysql zip pcntl bcmath && docker-php-ext-configure gd --with-freetype --with-jpeg && docker-php-ext-install -j$(nproc) gd
 
-COPY docker/nginx.conf /etc/nginx/nginx.conf
+# Set timezone
+RUN ln -snf /usr/share/zoneinfo/UTC /etc/localtime && echo "UTC" > /etc/timezone
 
-RUN mkdir -p /app
-COPY . /app
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN sh -c "wget http://getcomposer.org/composer.phar && chmod a+x composer.phar && mv composer.phar /usr/local/bin/composer"
-RUN cd /app && \
-    /usr/local/bin/composer install --no-dev
+# Set working directory
+WORKDIR /app
 
-RUN chown -R www-data: /app
+# Copy composer.lock and composer.json
+COPY composer.lock composer.json /app/
 
-CMD sh /app/docker/startup.sh
+# Install dependencies
+RUN composer install --no-autoloader --no-scripts
+
+# Copy everything else
+COPY . /app/
+
+# Create a link to the public directory
+RUN ln -s /app/public /app/html
+
+# Run composer dump-autoload
+RUN composer dump-autoload --optimize --no-scripts
+
+# Expose port 9000
+EXPOSE 9000
+
+# Set environment variables
+ENV PORT 9000
+ENV APP_ENV production
+ENV APP_DEBUG 0
+ENV LOG_CHANNEL daily
+ENV BROADCAST_DRIVER log
+ENV CACHE_DRIVER redis
+ENV SESSION_DRIVER database
+ENV QUEUE_DRIVER database
+
+# Start FPM server
+CMD ["php-fpm"]
