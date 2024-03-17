@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.2-apache
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -36,11 +36,10 @@ RUN ln -s /app/public /app/html
 # Run composer dump-autoload
 RUN composer dump-autoload --optimize --no-scripts
 
-# Expose port 9000
-EXPOSE 9000
+# Expose port 80
+EXPOSE 80
 
 # Set environment variables
-ENV PORT 9000
 ENV APP_ENV production
 ENV APP_DEBUG 0
 ENV LOG_CHANNEL daily
@@ -49,5 +48,14 @@ ENV CACHE_DRIVER redis
 ENV SESSION_DRIVER database
 ENV QUEUE_DRIVER database
 
-# Start FPM server
-CMD ["php-fpm"]
+# Removedefault Apache configuration
+RUN rm /etc/apache2/sites-available/000-default.conf
+
+# Copy Apache configuration
+COPY apache.conf /etc/apache2/sites-available/000-default.conf
+
+# Enable Apache modules
+RUN a2enmod rewrite headers
+
+# Start Apache server
+CMD ["httpd", "-D", "FOREGROUND"]

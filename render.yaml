@@ -4,7 +4,7 @@ services:
     name: my-laravel-app
     runtime: docker
     buildCommand: "composer install"
-    startCommand: "php artisan serve --host=0.0.0.0 --port=8000"
+    startCommand: "apache2-foreground"
     environmentVariables:
       APP_ENV: production
       APP_DEBUG: false
