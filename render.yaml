@@ -22,7 +22,7 @@ services:
       MEMCACHED_HOST: ${MEMCACHED_HOST}
       MEMCACHED_PORT: 11211
     ports:
-      - 8000
+      - 80
     dockerfilePath: Dockerfile
     dockerContext: .
 
