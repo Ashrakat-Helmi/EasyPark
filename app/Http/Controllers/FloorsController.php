@@ -76,3 +76,4 @@ class FloorsController extends Controller
         // return floors::join('garages',"garages.id","=","floors.garageId")->where('garageId', '=', $garageId)->get();
 
 }
+}
