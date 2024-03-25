@@ -1,28 +1,36 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.2-fpm
 
-# sets up the server Nginx
-RUN apk add --no-cache nginx
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    zip \
+    unzip
 
-# Copy Nginx configuration file
-COPY nginx.conf ./nginx.conf
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy Laravel application files
-COPY . /var/www/html
+# Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql
 
-# Set the working directory
+# Set working directory
 WORKDIR /var/www/html
+
+# Copy project files
+COPY . .
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Install Laravel dependencies
-RUN composer install
+# Install project dependencies
+RUN composer install --no-dev
 
-# Set Nginx user and group
-RUN addgroup -S nginx && adduser -S -G nginx www
+# Expose port
+EXPOSE 8000
 
-# Set the permissions for the Laravel application files
-RUN chown -R www:nginx /var/www/html
-
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start Laravel server
+CMD php artisan serve --host=0.0.0.0 --port=8000
